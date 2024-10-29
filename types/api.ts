@@ -3,8 +3,20 @@ export interface SignUpResponse {
     email: string;
   }
   
-  export interface SignUpPayload {
+export interface SignUpPayload {
     email: string;
     password: string;
     nickname: string;
+  }
+
+export interface LogInPayload {
+    email: string;
+    password: string;
+  }
+
+export interface UserStore {
+    user: {
+      email: string;
+      nickname: string;
+    } | null;
   }
