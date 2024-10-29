@@ -14,9 +14,10 @@ export interface LogInPayload {
     password: string;
   }
 
-export interface UserStore {
+export interface UserState {
     user: {
       email: string;
       nickname: string;
     } | null;
+    token: string | null;
   }

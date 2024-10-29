@@ -1,19 +1,40 @@
 import { defineStore } from "pinia";
-import type { SignUpResponse, SignUpPayload, LogInPayload } from "@/types/api";
+import type {
+  SignUpResponse,
+  SignUpPayload,
+  LogInPayload,
+  UserState,
+} from "@/types/api";
 
 interface ErrorResponse {
   error?: string;
 }
 
 export const useUserStore = defineStore("user", {
-  state: () => ({
-    user: null as {
-      email: string;
-      nickname: string;
-    } | null,
+  state: (): UserState => ({
+    user: null,
+    token: null,
   }),
 
+  getters: {
+    isLoggedIn: (state) => !!state.token && !!state.user,
+    getToken: (state) => state.token,
+    getUserEmail: (state) => state.user?.email,
+    getUserNickname: (state) => state.user?.nickname,
+  },
+
   actions: {
+    setToken(headers: Headers) {
+      const authHeader = headers.get("authorization");
+      if (authHeader) {
+        this.token = authHeader.replace("Bearer ", "");
+        // 保存到 localStorage
+        localStorage.setItem("token", this.token);
+        // 保存到 useState（用於 SSR）
+        useState("token", () => this.token);
+      }
+    },
+
     async signUp(payload: SignUpPayload) {
       try {
         const response = await $fetch<SignUpResponse>(
@@ -31,6 +52,9 @@ export const useUserStore = defineStore("user", {
           nickname: response.nickname,
         };
 
+        // 儲存用戶資訊
+        localStorage.setItem("user", JSON.stringify(this.user));
+        useState("user", () => this.user);
         return response;
       } catch (error: any) {
         console.error("註冊錯誤:", error);
@@ -70,11 +94,21 @@ export const useUserStore = defineStore("user", {
           throw new Error("伺服器回應格式錯誤");
         }
 
+        // 從 response headers 獲取並保存 token
+        const headers = useRequestHeaders(["authorization"]);
+        if (headers.authorization) {
+          this.setToken(new Headers(headers));
+        }
+
         this.user = {
           email: response.email,
           nickname: response.nickname,
         };
+        // 儲存用戶資訊
+        localStorage.setItem("user", JSON.stringify(this.user));
+        useState("user", () => this.user);
         return response;
+
       } catch (error: any) {
         console.error("登入失敗:", error);
         // 401錯誤
@@ -86,5 +120,39 @@ export const useUserStore = defineStore("user", {
         throw new Error("登入失敗，請稍後再試");
       }
     },
+    logout() {
+      this.user = null
+      this.token = null
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      const token = useState<string | null>('token')
+      const user = useState<UserState['user']>('user')
+      token.value = null
+      user.value = null
+    },
+
+    // 初始化時檢查登入狀態
+    init() {
+      // 優先從 useState 讀取（支援 SSR）
+      const nuxtToken = useState<string | null>('token')
+      const nuxtUser = useState<UserState['user']>('user')
+      
+      if (nuxtToken.value && nuxtUser.value) {
+        this.token = nuxtToken.value;
+        this.user = nuxtUser.value;
+        return;
+      }
+
+      // 從 localStorage 讀取（僅客戶端）
+      if (process) {
+        const savedToken = localStorage.getItem('token')
+        const savedUser = localStorage.getItem('user')
+        
+        if (savedToken && savedUser) {
+          this.token = savedToken
+          this.user = JSON.parse(savedUser)
+        }
+      }
+    }
   },
 });
