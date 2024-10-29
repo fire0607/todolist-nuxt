@@ -9,7 +9,7 @@ const router = useRouter();
 
 // 表單驗證規則
 const schema = object({
-  email: string().email("請輸入正確的email格式").required("請輸入電子郵件"),
+  email: string().email("請輸入正確的電子郵件格式").required("請輸入電子郵件"),
   password: string().min(6, "最少要輸入6個字元").required("請輸入密碼"),
   nickname: string().required("請輸入暱稱"),
 });
@@ -62,7 +62,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       icon: "i-heroicons-check-circle",
       description: "歡迎加入我們 :D！",
       color: "green",
-      timeout: 1500,
+      timeout: 2000,
     });
     router.push("/");
   } catch (error: any) {
@@ -72,7 +72,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       icon: "i-heroicons-exclamation-circle",
       description: error.message,
       color: "red",
-      timeout: 1500,
+      timeout: 2000,
     });
   }
 }
