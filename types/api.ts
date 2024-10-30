@@ -21,3 +21,9 @@ export interface UserState {
     } | null;
     token: string | null;
   }
+
+export interface LoginResponse {
+  message: string;
+  email: string;
+  nickname: string;
+}
