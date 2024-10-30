@@ -5,6 +5,7 @@ import type {
   SignUpPayload,
   LogInPayload,
   UserState,
+  LoginResponse,
 } from "@/types/api";
 
 interface ErrorResponse {
@@ -79,42 +80,56 @@ export const useUserStore = defineStore("user", () => {
 
   const logIn = async (payload: LogInPayload) => {
     try {
-      const response = await $fetch<SignUpResponse>(
+      const response = await $fetch.raw<LoginResponse>(
         "https://todoo.5xcamp.us/users/sign_in",
         {
           method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
           body: {
             user: payload,
           },
         }
       );
-      if (!response || !response.email || !response.nickname) {
+      // 回應資料（JSON 內容）
+      const data = response._data;
+      console.log("取得回傳 res：", data);
+
+      // 確保回應格式正確
+      if (!data || !data.email || !data.nickname) {
         throw new Error("伺服器回應格式錯誤");
       }
 
-      // 從 response headers 獲取並保存 token
-      const headers = useRequestHeaders(["authorization"]);
-      if (headers.authorization) {
-        setToken(new Headers(headers));
+      // 取得 headers，從中取出 authorization 欄位
+      const authToken = response.headers.get("authorization");
+      console.log("取得authToken：", authToken);
+
+      if (authToken) {
+        const headers = new Headers({ authorization: authToken });
+        setToken(headers);
       }
 
+      // 更新 user 資訊
       user.value = {
-        email: response.email,
-        nickname: response.nickname,
+        email: data.email,
+        nickname: data.nickname,
       };
+
       // 儲存用戶資訊
       localStorage.setItem("user", JSON.stringify(user.value));
       useState("user", () => user.value);
-      console.log(headers);
-      return response;
+
+      console.log("取得 headers：", response.headers);
+      console.log("Authorization Token：", authToken);
+      return data;
     } catch (error: any) {
       console.error("登入失敗:", error);
-      // 401錯誤
       if (error.status === 401) {
         const errorResponse = error.data as ErrorResponse;
         throw new Error(errorResponse.error || "電子信箱或密碼錯誤");
       }
-      // 其他錯誤
       throw new Error("登入失敗，請稍後再試");
     }
   };
