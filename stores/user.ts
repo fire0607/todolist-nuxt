@@ -34,7 +34,6 @@ export const useUserStore = defineStore("user", {
         useState("token", () => this.token);
       }
     },
-
     async signUp(payload: SignUpPayload) {
       try {
         const response = await $fetch<SignUpResponse>(
@@ -107,6 +106,7 @@ export const useUserStore = defineStore("user", {
         // 儲存用戶資訊
         localStorage.setItem("user", JSON.stringify(this.user));
         useState("user", () => this.user);
+        console.log(headers);
         return response;
 
       } catch (error: any) {
