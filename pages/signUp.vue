@@ -79,32 +79,57 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <section>
-    <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-      <UFormGroup label="電子郵件" name="email" :error="fieldErrors.email">
-        <UInput
-          v-model="state.email"
-          :class="{ 'border-red-500': fieldErrors.email }"
-        />
-      </UFormGroup>
+  <section class="grid bg-blue-300 w-full h-screen relative mx-auto">
+    <div class="absolute">測試用的</div>
+    <section class="justify-self-end bg-white w-6/12 h-screen p-12">
+      <UForm
+        :schema="schema"
+        :state="state"
+        class="space-y-4 pt-24"
+        @submit="onSubmit"
+      >
+        <UFormGroup
+          label="電子郵件"
+          name="email"
+          :error="fieldErrors.email"
+          class="focus:bg-yellow-500"
+        >
+          <UInput
+            v-model="state.email"
+            :class="{ 'border-red-500': fieldErrors.email }"
+          />
+        </UFormGroup>
 
-      <UFormGroup label="密碼" name="password" :error="fieldErrors.password">
-        <UInput
-          v-model="state.password"
-          type="password"
-          :class="{ 'border-red-500': fieldErrors.password }"
-        />
-      </UFormGroup>
+        <UFormGroup label="密碼" name="password" :error="fieldErrors.password">
+          <UInput
+            v-model="state.password"
+            type="password"
+            :class="{ 'border-red-500': fieldErrors.password }"
+          />
+        </UFormGroup>
 
-      <UFormGroup label="暱稱" name="nickname" :error="fieldErrors.nickname">
-        <UInput
-          v-model="state.nickname"
-          :class="{ 'border-red-500': fieldErrors.nickname }"
-        />
-      </UFormGroup>
+        <UFormGroup label="暱稱" name="nickname" :error="fieldErrors.nickname">
+          <UInput
+            v-model="state.nickname"
+            :class="{ 'border-red-500': fieldErrors.nickname }"
+          />
+        </UFormGroup>
 
-      <UButton type="submit" block> 註冊 </UButton>
-    </UForm>
+        <UButton type="submit" block class="bg-blue-500 py-3 hover:bg-blue-400">
+          註冊
+        </UButton>
+        <div class="justify-self-end">
+          <span>已有帳戶？</span>
+          <ULink
+            to="/logIn"
+            active-class="text-primary"
+            inactive-class="text-gray-500 hover:text-blue-800 "
+          >
+            登入
+          </ULink>
+        </div>
+      </UForm>
+    </section>
   </section>
 </template>
 
