@@ -78,21 +78,26 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 }
 </script>
 
-<template>
-  <section class="grid bg-blue-300 w-full h-screen relative mx-auto">
-    <div class="absolute">測試用的</div>
-    <section class="justify-self-end bg-white w-6/12 h-screen p-12">
+<template class="">
+  <section class="bg-blue-300 w-full h-screen relative mx-auto sm:grid">
+    <div class="hidden absolute z-0 sm:flex">*精美的圖片*</div>
+    <section
+      class="justify-self-end bg-white w-full h-screen flex flex-col sm:w-6/12"
+    >
       <UForm
         :schema="schema"
         :state="state"
-        class="space-y-4 pt-24"
+        class="space-y-4 p-20 sm:p-32"
         @submit="onSubmit"
       >
+        <section class="block text-center sm:hidden">
+          預留手機板標題區塊
+        </section>
         <UFormGroup
           label="電子郵件"
           name="email"
           :error="fieldErrors.email"
-          class="focus:bg-yellow-500"
+          class="pt-3 sm:pt-24"
         >
           <UInput
             v-model="state.email"
