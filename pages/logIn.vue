@@ -79,28 +79,43 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 }
 </script>
 <template>
-  <section>
-    <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-      <UFormGroup label="電子郵件" name="email">
-        <UInput v-model="state.email" />
-      </UFormGroup>
-
-      <UFormGroup label="密碼" name="password">
-        <UInput v-model="state.password" type="password" />
-      </UFormGroup>
-
-      <UButton type="submit"> 登入 </UButton>
-    </UForm>
-    <div>
-      <span>沒有帳戶？</span>
-      <ULink
-        to="/signUp"
-        active-class="text-primary"
-        inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+  <section class="bg-blue-300 w-full h-screen relative mx-auto sm:grid">
+    <div class="hidden absolute z-0 sm:flex">*精美的圖片*</div>
+    <section
+      class="justify-self-end bg-white w-full h-screen flex flex-col sm:w-6/12"
+    >
+      <UForm
+        :schema="schema"
+        :state="state"
+        class="space-y-4 p-20 sm:p-32"
+        @submit="onSubmit"
       >
-        註冊
-      </ULink>
-    </div>
+        <section class="block text-center sm:hidden">
+          預留手機板標題區塊
+        </section>
+        <UFormGroup label="電子郵件" name="email" class="pt-3 sm:pt-24">
+          <UInput v-model="state.email" />
+        </UFormGroup>
+
+        <UFormGroup label="密碼" name="password">
+          <UInput v-model="state.password" type="password" />
+        </UFormGroup>
+
+        <UButton type="submit" block class="bg-blue-500 py-3 hover:bg-blue-400">
+          登入
+        </UButton>
+        <div class="justify-self-end">
+          <span>沒有帳戶？</span>
+          <ULink
+            to="/signUp"
+            active-class="text-primary"
+            inactive-class="text-gray-500 hover:text-blue-800 "
+          >
+            註冊
+          </ULink>
+        </div>
+      </UForm>
+    </section>
   </section>
 </template>
 <style scoped></style>
