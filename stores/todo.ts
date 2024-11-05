@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 import { useUserStore } from "./user";
 
 interface Todo {
-  // 根據實際API回傳的資料結構調整這個介面
   id: number;
   content: string;
   completed: boolean;

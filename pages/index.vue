@@ -31,19 +31,22 @@ onMounted(async () => {
       </div>
 
       <section class="w-full px-8 sm:w-4/5 sm:px-0">
-        <div class="container mx-auto py-20">
+        <div class="container mx-auto py-20 v-auto-animate">
           <h1 class="text-2xl font-bold mb-4 text-left text-blue-950">
             今日待辦事項
           </h1>
           <div class="relative mb-4">
-            <UInput v-model="value" class="h-full" />
-            <button class="absolute top-[2px] right-2">
+            <input
+              v-model="value"
+              class="w-full border-2 border-blue-300 p-1 rounded-md focus:outline-2 focus:outline-blue-500 focus:ring-blue-500 focus:shadow"
+            />
+            <button class="absolute top-1 right-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="28px"
                 height="28px"
                 viewBox="0 0 16 16"
-                class="text-blue-900 font-bold hover:text-blue-700"
+                class="text-blue-200 font-bold hover:text-blue-400"
               >
                 <path
                   fill="currentColor"
