@@ -27,7 +27,7 @@ async function initializeApp() {
   } catch (error) {
     console.error(error);
     toast.add({
-      title: "位",
+      title: "錯誤",
       icon: "i-heroicons-exclamation-circle",
       description: `請先登入帳號`,
       color: "red",
@@ -36,9 +36,29 @@ async function initializeApp() {
   } finally {
     setTimeout(() => {
       pageLoading.value = false;
-    }, 800);
+    }, 500);
   }
 }
+
+// 新增待辦事項
+const handleAddTodo = async () => {
+  if (!value.value.trim()) {
+    return;
+  }
+
+  const success = await todoStore.addTodo(value.value);
+
+  if (success) {
+    toast.add({
+      title: "成功",
+      icon: "i-heroicons-check-circle",
+      description: "新增待辦事項成功",
+      color: "green",
+      timeout: 1500,
+    });
+    value.value = "";
+  }
+};
 
 // 頁面載入時執行初始化
 onMounted(() => {
@@ -59,6 +79,7 @@ onMounted(() => {
       <span class="text-blue-700 font-medium">載入中...</span>
     </div>
   </div>
+  <!-- 主畫面 -->
   <template v-else>
     <div class="w-screen bg-blue-100"></div>
     <section class="bg-blue-300 w-full h-screen relative mx-auto sm:grid">
@@ -79,9 +100,10 @@ onMounted(() => {
             <div class="relative mb-4">
               <input
                 v-model="value"
-                class="w-full border-2 border-blue-300 p-1 rounded-md focus:outline-2 focus:outline-blue-500 focus:ring-blue-500 focus:shadow"
+                @keyup.enter="handleAddTodo"
+                class="w-full border-2 border-blue-300 p-1 pl-3 rounded-md focus:outline-2 focus:outline-blue-500 focus:ring-blue-500 focus:shadow"
               />
-              <button class="absolute top-1 right-2">
+              <button @click="handleAddTodo" class="absolute top-1 right-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="28px"
@@ -97,32 +119,46 @@ onMounted(() => {
               </button>
             </div>
 
-            <!-- 待辦事項載入中狀態 -->
-            <div v-if="todoStore.isLoading" class="text-center text-blue-300">
-              <p>載入中...</p>
-            </div>
-
-            <!-- 錯誤訊息 -->
-            <div v-else-if="todoStore.getError" class="text-red-700">
-              {{ todoStore.getError }}
-            </div>
-
-            <!-- 待辦事項列表 -->
-            <div v-else>
-              <div v-if="todoStore.getTodos.length === 0" class="text-blue-300">
-                目前沒有待辦事項，寫一個吧！
+            <!-- 待辦事項容器 -->
+            <div class="relative">
+              <!-- 錯誤訊息 -->
+              <div v-if="todoStore.getError" class="text-red-700">
+                {{ todoStore.getError }}
               </div>
 
-              <ul v-else class="space-y-5">
-                <li
-                  v-for="todo in todoStore.getTodos"
-                  :key="todo.id"
-                  class="flex items-center py-2 text-left border-b border-blue-100 text-blue-950"
+              <!-- 待辦事項列表 -->
+              <div v-else>
+                <div
+                  v-if="todoStore.getTodos.length === 0"
+                  class="text-blue-300"
                 >
-                  <input type="checkbox" class="w-5 h-5" />
-                  <p class="pl-2">{{ todo.content }}</p>
-                </li>
-              </ul>
+                  目前沒有待辦事項，寫一個吧！
+                </div>
+
+                <ul v-else class="space-y-5 px-2">
+                  <li
+                    v-for="todo in todoStore.getTodos"
+                    :key="todo.id"
+                    class="flex items-center py-2 text-left border-b border-blue-100 text-blue-950"
+                  >
+                    <input type="checkbox" class="w-5 h-5" />
+                    <p class="pl-2">{{ todo.content }}</p>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- 局部載入遮罩 -->
+              <div
+                v-if="todoStore.isLoading"
+                class="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10"
+              >
+                <div class="flex flex-col items-center gap-2">
+                  <div
+                    class="animate-spin h-8 w-8 border-4 border-blue-200 border-t-blue-500 rounded-full"
+                  ></div>
+                  <span class="text-blue-700 text-sm">載入中...</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
