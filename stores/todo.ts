@@ -3,7 +3,7 @@ import { ref, computed } from "vue";
 import { useUserStore } from "./user";
 
 interface Todo {
-  id: number;
+  id: string;
   content: string;
   completed: boolean;
 }
@@ -64,6 +64,52 @@ export const useTodoStore = defineStore("todo", () => {
     }
   };
 
+  // 新增待辦事項
+  const addTodo = async (content: string) => {
+    // 內容不為空
+    if (!content.trim()) {
+      error.value = "待辦事項不能為空";
+      return false;
+    }
+
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const userStore = useUserStore();
+      const response = await $fetch<{ id: string; content: string }>(
+        "https://todoo.5xcamp.us/todos",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${userStore.getToken}`,
+            "Content-Type": "application/json",
+          },
+          body: {
+            todo: {
+              content: content.trim(),
+            },
+          },
+        }
+      );
+
+      // 新增到本地狀態
+      todos.value.push({
+        id: response.id,
+        content: response.content,
+        completed: false,
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error("新增待辦事項失敗:", error);
+      error.value = "新增待辦事項失敗，請稍後再試";
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     // state
     todos,
@@ -75,5 +121,6 @@ export const useTodoStore = defineStore("todo", () => {
     getError,
     // actions
     fetchTodos,
+    addTodo,
   };
 });
