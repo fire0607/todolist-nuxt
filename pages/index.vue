@@ -135,9 +135,9 @@ onMounted(() => {
                   目前沒有待辦事項，寫一個吧！
                 </div>
 
-                <ul v-else class="space-y-5">
+                <ul v-else class="space-y-5 px-2">
                   <li
-                    v-for="todo in todoStore.paginatedTodos"
+                    v-for="todo in todoStore.getTodos"
                     :key="todo.id"
                     class="flex items-center py-2 text-left border-b border-blue-100 text-blue-950"
                   >
@@ -145,22 +145,6 @@ onMounted(() => {
                     <p class="pl-2">{{ todo.content }}</p>
                   </li>
                 </ul>
-
-                <!-- 分頁元件 -->
-                <div
-                  v-if="todoStore.shouldShowPagination"
-                  class="mt-6 flex justify-center"
-                >
-                  <UPagination
-                    :model-value="todoStore.getCurrentPage"
-                    :total="todoStore.totalPages"
-                    :total-items="todoStore.getTodos.length"
-                    :per-page="10"
-                    show-last
-                    show-first
-                    @update:model-value="todoStore.setCurrentPage"
-                  />
-                </div>
               </div>
 
               <!-- 局部載入遮罩 -->

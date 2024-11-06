@@ -8,43 +8,22 @@ interface Todo {
   completed: boolean;
 }
 
+interface TodoState {
+  todos: Todo[];
+  loading: boolean;
+  error: string | null;
+}
+
 export const useTodoStore = defineStore("todo", () => {
   // state
   const todos = ref<Todo[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const currentPage = ref(1);
-  const itemsPerPage = 10;
 
   // getters
   const getTodos = computed(() => todos.value);
   const isLoading = computed(() => loading.value);
   const getError = computed(() => error.value);
-  const getCurrentPage = computed(() => currentPage.value);
-
-  // 計算總頁數
-  const totalPages = computed(() => {
-    return Math.ceil(todos.value.length / itemsPerPage);
-  });
-
-  // 當前頁面的待辦事項
-  const paginatedTodos = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return todos.value.slice(start, end);
-  });
-
-  // 計算是否需要顯示分頁
-  const shouldShowPagination = computed(
-    () => todos.value.length > itemsPerPage
-  );
-
-  // 設置當前頁面
-  const setCurrentPage = (page: number) => {
-    if (page >= 1 && page <= totalPages.value) {
-      currentPage.value = page;
-    }
-  };
 
   // actions
   const fetchTodos = async () => {
@@ -70,7 +49,6 @@ export const useTodoStore = defineStore("todo", () => {
       );
 
       todos.value = response.todos;
-
     } catch (error: any) {
       console.error("獲取待辦事項失敗:", error);
       if (error.status === 401) {
@@ -88,6 +66,7 @@ export const useTodoStore = defineStore("todo", () => {
 
   // 新增待辦事項
   const addTodo = async (content: string) => {
+    // 內容不為空
     if (!content.trim()) {
       error.value = "待辦事項不能為空";
       return false;
@@ -121,10 +100,6 @@ export const useTodoStore = defineStore("todo", () => {
         completed: false,
       });
 
-      // 檢查是否需要跳轉到最後一頁
-      const newTotalPages = Math.ceil(todos.value.length / itemsPerPage);
-      currentPage.value = newTotalPages;
-
       return true;
     } catch (error: any) {
       console.error("新增待辦事項失敗:", error);
@@ -140,18 +115,12 @@ export const useTodoStore = defineStore("todo", () => {
     todos,
     loading,
     error,
-    currentPage,
     // getters
     getTodos,
     isLoading,
     getError,
-    getCurrentPage,
-    paginatedTodos,
-    totalPages,
-    shouldShowPagination,
     // actions
     fetchTodos,
     addTodo,
-    setCurrentPage,
   };
 });
