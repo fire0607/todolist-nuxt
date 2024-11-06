@@ -50,9 +50,9 @@ const handleAddTodo = async () => {
 
   if (success) {
     toast.add({
-      title: "成功",
+      title: "新增成功",
       icon: "i-heroicons-check-circle",
-      description: "新增待辦事項成功",
+      description: "又多一件事情要做了(‾◡◝　)",
       color: "green",
       timeout: 1500,
     });
@@ -82,7 +82,7 @@ onMounted(() => {
   <!-- 主畫面 -->
   <template v-else>
     <div class="w-screen bg-blue-100"></div>
-    <section class="bg-blue-300 w-full h-screen relative mx-auto sm:grid">
+    <section class="bg-blue-300 w-screen h-screen relative mx-auto sm:grid">
       <div class="hidden absolute z-0 sm:flex">*精美的圖片*</div>
       <section
         class="items-center justify-self-end bg-white w-full h-screen flex flex-col text-center sm:w-3/5"
@@ -135,9 +135,9 @@ onMounted(() => {
                   目前沒有待辦事項，寫一個吧！
                 </div>
 
-                <ul v-else class="space-y-5 px-2">
+                <ul v-else class="space-y-5">
                   <li
-                    v-for="todo in todoStore.getTodos"
+                    v-for="todo in todoStore.paginatedTodos"
                     :key="todo.id"
                     class="flex items-center py-2 text-left border-b border-blue-100 text-blue-950"
                   >
@@ -145,6 +145,22 @@ onMounted(() => {
                     <p class="pl-2">{{ todo.content }}</p>
                   </li>
                 </ul>
+
+                <!-- 分頁元件 -->
+                <div
+                  v-if="todoStore.shouldShowPagination"
+                  class="mt-6 flex justify-center"
+                >
+                  <UPagination
+                    :model-value="todoStore.getCurrentPage"
+                    :total="todoStore.totalPages"
+                    :total-items="todoStore.getTodos.length"
+                    :per-page="10"
+                    show-last
+                    show-first
+                    @update:model-value="todoStore.setCurrentPage"
+                  />
+                </div>
               </div>
 
               <!-- 局部載入遮罩 -->
