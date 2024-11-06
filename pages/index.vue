@@ -98,12 +98,12 @@ onMounted(() => {
               今日待辦事項
             </h1>
             <div class="relative mb-4">
-              <input
+              <textarea
                 v-model="value"
                 @keyup.enter="handleAddTodo"
-                class="w-full border-2 border-blue-300 p-1 pl-3 rounded-md focus:outline-2 focus:outline-blue-500 focus:ring-blue-500 focus:shadow"
-              />
-              <button @click="handleAddTodo" class="absolute top-1 right-2">
+                class="w-full min-h-4 border-2 border-blue-300 p-1 pl-3 rounded-md focus:outline-2 focus:outline-blue-400 focus:ring-blue-400 focus:shadow"
+              ></textarea>
+              <button @click="handleAddTodo" class="absolute top-1 right-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="28px"
