@@ -8,12 +8,6 @@ interface Todo {
   completed: boolean;
 }
 
-interface TodoState {
-  todos: Todo[];
-  loading: boolean;
-  error: string | null;
-}
-
 export const useTodoStore = defineStore("todo", () => {
   // state
   const todos = ref<Todo[]>([]);
@@ -26,6 +20,8 @@ export const useTodoStore = defineStore("todo", () => {
   const getError = computed(() => error.value);
 
   // actions
+
+  // 取得待辦清單
   const fetchTodos = async () => {
     loading.value = true;
     error.value = null;
@@ -110,6 +106,50 @@ export const useTodoStore = defineStore("todo", () => {
     }
   };
 
+  //修改待辦事項
+  const updateTodo = async (id: string, content: string) => {
+    if (!content.trim()) {
+      error.value = "待辦事項不能為空";
+      return false;
+    }
+
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const userStore = useUserStore();
+      const response = await $fetch<{ id: string; content: string }>(
+        `https://todoo.5xcamp.us/todos/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${userStore.getToken}`,
+            "Content-Type": "application/json",
+          },
+          body: {
+            todo: {
+              content: content.trim(),
+            },
+          },
+        }
+      );
+
+      // 更新狀態
+      const index = todos.value.findIndex((todo) => todo.id === id);
+      if (index !== -1) {
+        todos.value[index].content = response.content;
+      }
+
+      return true;
+    } catch (error: any) {
+      console.error("修改待辦事項失敗:", error);
+      error.value = "修改待辦事項失敗，請稍後再試";
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     // state
     todos,
@@ -122,5 +162,6 @@ export const useTodoStore = defineStore("todo", () => {
     // actions
     fetchTodos,
     addTodo,
+    updateTodo
   };
 });

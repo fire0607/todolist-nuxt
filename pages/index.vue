@@ -2,6 +2,11 @@
 import { useTodoStore } from "~/stores/todo";
 import { useUserStore } from "~/stores/user";
 
+interface EditingTodo {
+  id: string;
+  content: string;
+}
+
 const todoStore = useTodoStore();
 const userStore = useUserStore();
 const toast = useToast();
@@ -9,6 +14,10 @@ const toast = useToast();
 const value = ref("");
 const pageLoading = ref(true);
 
+const editingTodo = ref<EditingTodo | null>(null);
+const showEditModal = ref(false);
+
+// 確認登入狀態
 async function initializeApp() {
   try {
     if (!userStore.isLoggedIn) {
@@ -52,11 +61,42 @@ const handleAddTodo = async () => {
     toast.add({
       title: "新增成功",
       icon: "i-heroicons-check-circle",
-      description: "又多一件事情要做了(‾◡◝　)",
+      description: "又多一件事情要做了 (‾◡◝　)",
       color: "green",
       timeout: 1500,
     });
     value.value = "";
+  }
+};
+
+// 更新待辦事項 - 開啟編輯視窗
+const handleEditClick = (todo: { id: string; content: string }) => {
+  editingTodo.value = {
+    id: todo.id,
+    content: todo.content,
+  };
+  showEditModal.value = true;
+};
+
+// 更新待辦事項
+const handleUpdateTodo = async () => {
+  if (!editingTodo.value) return;
+
+  const success = await todoStore.updateTodo(
+    editingTodo.value.id,
+    editingTodo.value.content
+  );
+
+  if (success) {
+    toast.add({
+      title: "修改成功",
+      icon: "i-heroicons-check-circle",
+      description: "待辦事項已修改 d(`･∀･)b",
+      color: "green",
+      timeout: 1500,
+    });
+    showEditModal.value = false;
+    editingTodo.value = null;
   }
 };
 
@@ -140,12 +180,61 @@ onMounted(() => {
                   <li
                     v-for="todo in todoStore.getTodos"
                     :key="todo.id"
-                    class="flex items-center px-2 py-4 text-left border-b border-blue-100 text-blue-950 hover:bg-blue-50"
+                    class="flex items-center justify-start px-2 py-4 text-left border-b border-blue-100 text-blue-950 hover:bg-blue-50"
                   >
                     <input type="checkbox" class="w-5 h-5" />
                     <p class="pl-2">{{ todo.content }}</p>
+                    <button
+                      @click="handleEditClick(todo)"
+                      class="ml-auto text-blue-100 hover:text-blue-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24px"
+                        height="24px"
+                        viewBox="0 0 16 16"
+                      >
+                        <g fill="currentColor">
+                          <path
+                            d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.8 2.8 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.8 2.8 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.474"
+                          ></path>
+                          <path
+                            d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5z"
+                          ></path>
+                        </g>
+                      </svg>
+                    </button>
                   </li>
                 </ul>
+              </div>
+              <!-- 編輯待辦事項的彈窗 -->
+              <div
+                v-if="showEditModal"
+                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+              >
+                <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+                  <h3 class="text-lg font-semibold mb-4">修改待辦事項</h3>
+                  <textarea
+                    v-if="editingTodo"
+                    v-model="editingTodo.content"
+                    class="w-full min-h-10 max-h-32 border-2 border-blue-300 p-2 rounded-md mb-4 focus:outline-2 focus:outline-blue-400"
+                    maxlength="100"
+                  ></textarea>
+                  <div class="flex justify-end gap-2">
+                    <button
+                      @click="showEditModal = false"
+                      class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+                    >
+                      取消
+                    </button>
+                    <button
+                      @click="handleUpdateTodo"
+                      class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md"
+                    >
+                      更新
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- 局部載入遮罩 -->
