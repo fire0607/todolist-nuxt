@@ -16,6 +16,7 @@ const pageLoading = ref(true);
 
 const editingTodo = ref<EditingTodo | null>(null);
 const showEditModal = ref(false);
+const editingError = ref("");
 
 // 確認登入狀態
 async function initializeApp() {
@@ -81,6 +82,13 @@ const handleEditClick = (todo: { id: string; content: string }) => {
 // 更新待辦事項
 const handleUpdateTodo = async () => {
   if (!editingTodo.value) return;
+
+  // 驗證內容
+  if (!editingTodo.value.content.trim()) {
+    editingError.value = "請輸入修改內容";
+    return;
+  }
+  editingError.value = "";
 
   const success = await todoStore.updateTodo(
     editingTodo.value.id,
@@ -213,14 +221,22 @@ onMounted(() => {
                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
               >
                 <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-                  <h3 class="text-lg font-semibold mb-4">修改待辦事項</h3>
+                  <h3 class="text-lg font-semibold mb-4 text-left">
+                    修改待辦事項
+                  </h3>
                   <textarea
                     v-if="editingTodo"
                     v-model="editingTodo.content"
-                    class="w-full min-h-10 max-h-32 border-2 border-blue-300 p-2 rounded-md mb-4 focus:outline-2 focus:outline-blue-400"
+                    :class="[
+                      'w-full min-h-10 max-h-32 border-2 p-2 rounded-md focus:outline-2 focus:outline-blue-400',
+                      editingError ? 'border-red-500' : 'border-blue-300',
+                    ]"
                     maxlength="100"
                   ></textarea>
-                  <div class="flex justify-end gap-2">
+                  <p v-if="editingError" class="text-sm text-red-500 text-left">
+                    {{ editingError }}
+                  </p>
+                  <div class="flex justify-end gap-2 mt-4">
                     <button
                       @click="showEditModal = false"
                       class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"

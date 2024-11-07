@@ -108,11 +108,7 @@ export const useTodoStore = defineStore("todo", () => {
 
   //修改待辦事項
   const updateTodo = async (id: string, content: string) => {
-    if (!content.trim()) {
-      error.value = "待辦事項不能為空";
-      return false;
-    }
-
+    
     loading.value = true;
     error.value = null;
 
