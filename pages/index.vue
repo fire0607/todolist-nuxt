@@ -100,8 +100,9 @@ onMounted(() => {
             <div class="relative mb-4">
               <textarea
                 v-model="value"
+                maxlength="100"
                 @keyup.enter="handleAddTodo"
-                class="w-full min-h-4 border-2 border-blue-300 p-1 pl-3 rounded-md focus:outline-2 focus:outline-blue-400 focus:ring-blue-400 focus:shadow"
+                class="w-full min-h-10 max-h-32 border-2 border-blue-300 p-1 pl-3 pr-6 rounded-md text-lg focus:outline-2 focus:outline-blue-400 focus:ring-blue-400 focus:shadow"
               ></textarea>
               <button @click="handleAddTodo" class="absolute top-1 right-1">
                 <svg
@@ -120,7 +121,7 @@ onMounted(() => {
             </div>
 
             <!-- 待辦事項容器 -->
-            <div class="relative h-[600px] overflow-y-auto">
+            <div class="relative h-[450px] overflow-y-auto">
               <!-- 錯誤訊息 -->
               <div v-if="todoStore.getError" class="text-red-700">
                 {{ todoStore.getError }}
