@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useTodoStore } from "~/stores/todo";
 import { useUserStore } from "~/stores/user";
+import Swal from "sweetalert2";
 
 interface EditingTodo {
   id: string;
@@ -17,7 +18,6 @@ const pageLoading = ref(true);
 const editingTodo = ref<EditingTodo | null>(null);
 const showEditModal = ref(false);
 const editingError = ref("");
-const showDeleteModal = ref(false);
 
 // 確認登入狀態
 async function initializeApp() {
@@ -112,32 +112,45 @@ const handleUpdateTodo = async () => {
 // 刪除待辦事項
 const handleDeleteTodo = async (todo: { id: string }) => {
   try {
-    const success = await todoStore.deleteTodo(todo.id);
-    if (success) {
-      toast.add({
-        title: "刪除成功",
-        icon: "i-heroicons-check-circle",
-        description: "待辦事項已刪除 (๑•̀ㅂ•́)و✧",
-        color: "green",
-        timeout: 1500,
-      });
-    } else {
-      toast.add({
-        title: "刪除失敗",
-        icon: "i-heroicons-x-circle",
-        description: "刪除待辦事項失敗，請稍後再試",
-        color: "red",
-        timeout: 2000,
-      });
+    // 確認框
+    const result = await Swal.fire({
+      title: "確定要刪除嗎？",
+      text: "此操作無法復原",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#f87171",
+      cancelButtonColor: "#d1d5db",
+      confirmButtonText: "確認刪除",
+      cancelButtonText: "取消",
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      const success = await todoStore.deleteTodo(todo.id);
+      if (success) {
+        Swal.fire({
+          title: "刪除成功",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          title: "刪除失敗",
+          icon: "error",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
     }
   } catch (error) {
     console.error("刪除待辦事項時出錯:", error);
-    toast.add({
+    Swal.fire({
       title: "錯誤",
-      icon: "i-heroicons-exclamation-circle",
-      description: "刪除待辦事項時發生錯誤，請稍後再試",
-      color: "red",
-      timeout: 2000,
+      icon: "error",
+      text: "刪除待辦事項時發生錯誤,請稍後再試",
+      timer: 2000,
+      showConfirmButton: false,
     });
   }
 };
