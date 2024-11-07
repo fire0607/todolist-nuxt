@@ -17,6 +17,7 @@ const pageLoading = ref(true);
 const editingTodo = ref<EditingTodo | null>(null);
 const showEditModal = ref(false);
 const editingError = ref("");
+const showDeleteModal = ref(false);
 
 // 確認登入狀態
 async function initializeApp() {
@@ -108,6 +109,39 @@ const handleUpdateTodo = async () => {
   }
 };
 
+// 刪除待辦事項
+const handleDeleteTodo = async (todo: { id: string }) => {
+  try {
+    const success = await todoStore.deleteTodo(todo.id);
+    if (success) {
+      toast.add({
+        title: "刪除成功",
+        icon: "i-heroicons-check-circle",
+        description: "待辦事項已刪除 (๑•̀ㅂ•́)و✧",
+        color: "green",
+        timeout: 1500,
+      });
+    } else {
+      toast.add({
+        title: "刪除失敗",
+        icon: "i-heroicons-x-circle",
+        description: "刪除待辦事項失敗，請稍後再試",
+        color: "red",
+        timeout: 2000,
+      });
+    }
+  } catch (error) {
+    console.error("刪除待辦事項時出錯:", error);
+    toast.add({
+      title: "錯誤",
+      icon: "i-heroicons-exclamation-circle",
+      description: "刪除待辦事項時發生錯誤，請稍後再試",
+      color: "red",
+      timeout: 2000,
+    });
+  }
+};
+
 // 頁面載入時執行初始化
 onMounted(() => {
   initializeApp();
@@ -135,16 +169,12 @@ onMounted(() => {
       <section
         class="items-center justify-self-end bg-white w-full h-screen flex flex-col text-center sm:w-3/5"
       >
-        <div class="這是方便檢測用的 hidden">
-          <NuxtLink to="/logIn" class="text-red-500">登入</NuxtLink><br />
-          <NuxtLink to="/signUp">註冊</NuxtLink>
-        </div>
-
         <section class="w-full px-8 sm:w-4/5 sm:px-0">
           <div class="container mx-auto py-20 v-auto-animate">
             <h1 class="text-2xl font-bold mb-4 text-left text-blue-950">
               今日待辦事項
             </h1>
+            <!-- 輸入框 -->
             <div class="relative mb-4">
               <textarea
                 v-model="value"
@@ -192,26 +222,46 @@ onMounted(() => {
                   >
                     <input type="checkbox" class="w-5 h-5" />
                     <p class="pl-2">{{ todo.content }}</p>
-                    <button
-                      @click="handleEditClick(todo)"
-                      class="ml-auto text-blue-100 hover:text-blue-300"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24px"
-                        height="24px"
-                        viewBox="0 0 16 16"
+                    <div class="ml-auto space-x-2">
+                      <button
+                        @click="handleEditClick(todo)"
+                        class="text-blue-100 hover:text-blue-300"
                       >
-                        <g fill="currentColor">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24px"
+                          height="24px"
+                          viewBox="0 0 16 16"
+                        >
+                          <g fill="currentColor">
+                            <path
+                              d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.8 2.8 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.8 2.8 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.474"
+                            ></path>
+                            <path
+                              d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5z"
+                            ></path>
+                          </g>
+                        </svg>
+                      </button>
+                      <button
+                        @click="handleDeleteTodo(todo)"
+                        class="text-blue-100 hover:text-red-200"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24px"
+                          height="24px"
+                          viewBox="0 0 16 16"
+                        >
                           <path
-                            d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.8 2.8 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.8 2.8 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.474"
+                            fill="currentColor"
+                            fillRule="evenodd"
+                            d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.286a1.5 1.5 0 0 0 1.492-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25m2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75zM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6m3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711"
+                            clipRule="evenodd"
                           ></path>
-                          <path
-                            d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5z"
-                          ></path>
-                        </g>
-                      </svg>
-                    </button>
+                        </svg>
+                      </button>
+                    </div>
                   </li>
                 </ul>
               </div>
@@ -252,7 +302,6 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-
               <!-- 局部載入遮罩 -->
               <div
                 v-if="todoStore.isLoading"

@@ -108,7 +108,6 @@ export const useTodoStore = defineStore("todo", () => {
 
   //修改待辦事項
   const updateTodo = async (id: string, content: string) => {
-    
     loading.value = true;
     error.value = null;
 
@@ -146,6 +145,36 @@ export const useTodoStore = defineStore("todo", () => {
     }
   };
 
+  //刪除待辦事項
+  const deleteTodo = async (id: string) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const userStore = useUserStore();
+      await $fetch(`https://todoo.5xcamp.us/todos/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${userStore.getToken}`,
+        },
+      });
+
+      // 從陣列中移除待辦事項
+      const index = todos.value.findIndex((todo) => todo.id === id);
+      if (index !== -1) {
+        todos.value.splice(index, 1); // 使用 splice 來移除項目
+      }
+
+      return true;
+    } catch (err: any) {
+      console.error("刪除待辦事項失敗:", err);
+      error.value = err?.response?.statusText || "刪除待辦事項失敗，請稍後再試";
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     // state
     todos,
@@ -158,6 +187,7 @@ export const useTodoStore = defineStore("todo", () => {
     // actions
     fetchTodos,
     addTodo,
-    updateTodo
+    updateTodo,
+    deleteTodo,
   };
 });
