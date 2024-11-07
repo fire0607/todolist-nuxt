@@ -16,8 +16,6 @@ const value = ref("");
 const pageLoading = ref(true);
 
 const editingTodo = ref<EditingTodo | null>(null);
-const showEditModal = ref(false);
-const editingError = ref("");
 
 // 確認登入狀態
 async function initializeApp() {
@@ -71,41 +69,45 @@ const handleAddTodo = async () => {
   }
 };
 
-// 更新待辦事項 - 開啟編輯視窗
-const handleEditClick = (todo: { id: string; content: string }) => {
+// 更新待辦事項
+const handleEditClick = async (todo: { id: string; content: string }) => {
   editingTodo.value = {
     id: todo.id,
     content: todo.content,
   };
-  showEditModal.value = true;
-};
 
-// 更新待辦事項
-const handleUpdateTodo = async () => {
-  if (!editingTodo.value) return;
+  const { value: newContent } = await Swal.fire({
+    title: "修改待辦事項",
+    input: "textarea",
+    inputValue: editingTodo.value.content,
+    confirmButtonColor: "#60a5fa",
+    cancelButtonColor: "#d1d5db",
+    confirmButtonText: "確認修改",
+    cancelButtonText: "取消",
+    showCancelButton: true,
+    reverseButtons: true,
+    inputValidator: (value) => {
+      if (!value.trim()) {
+        return "請輸入修改內容";
+      }
+    },
+  });
 
-  // 驗證內容
-  if (!editingTodo.value.content.trim()) {
-    editingError.value = "請輸入修改內容";
-    return;
-  }
-  editingError.value = "";
-
-  const success = await todoStore.updateTodo(
-    editingTodo.value.id,
-    editingTodo.value.content
-  );
-
-  if (success) {
-    toast.add({
-      title: "修改成功",
-      icon: "i-heroicons-check-circle",
-      description: "待辦事項已修改 d(`･∀･)b",
-      color: "green",
-      timeout: 1500,
-    });
-    showEditModal.value = false;
-    editingTodo.value = null;
+  if (newContent) {
+    const success = await todoStore.updateTodo(
+      editingTodo.value.id,
+      newContent
+    );
+    if (success) {
+      toast.add({
+        title: "修改成功",
+        icon: "i-heroicons-check-circle",
+        description: "待辦事項已修改 d(`･∀･)b",
+        color: "green",
+        timeout: 1500,
+      });
+      editingTodo.value = null;
+    }
   }
 };
 
@@ -124,37 +126,37 @@ const handleDeleteTodo = async (todo: { id: string }) => {
       cancelButtonText: "取消",
       reverseButtons: true,
     });
-
     if (result.isConfirmed) {
       const success = await todoStore.deleteTodo(todo.id);
       if (success) {
-        Swal.fire({
+        toast.add({
           title: "刪除成功",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
+          icon: "i-heroicons-check-circle",
+          description: "待辦事項已刪除 (๑•̀ㅂ•́)و✧",
+          color: "green",
+          timeout: 1500,
         });
       } else {
-        Swal.fire({
+        toast.add({
           title: "刪除失敗",
-          icon: "error",
-          timer: 2000,
-          showConfirmButton: false,
+          icon: "i-heroicons-x-circle",
+          description: "刪除待辦事項失敗，請稍後再試",
+          color: "red",
+          timeout: 2000,
         });
       }
     }
   } catch (error) {
     console.error("刪除待辦事項時出錯:", error);
-    Swal.fire({
+    toast.add({
       title: "錯誤",
-      icon: "error",
-      text: "刪除待辦事項時發生錯誤,請稍後再試",
-      timer: 2000,
-      showConfirmButton: false,
+      icon: "i-heroicons-exclamation-circle",
+      description: "刪除待辦事項時發生錯誤，請稍後再試",
+      color: "red",
+      timeout: 2000,
     });
   }
 };
-
 // 頁面載入時執行初始化
 onMounted(() => {
   initializeApp();
@@ -277,43 +279,6 @@ onMounted(() => {
                     </div>
                   </li>
                 </ul>
-              </div>
-              <!-- 編輯待辦事項的彈窗 -->
-              <div
-                v-if="showEditModal"
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-              >
-                <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-                  <h3 class="text-lg font-semibold mb-4 text-left">
-                    修改待辦事項
-                  </h3>
-                  <textarea
-                    v-if="editingTodo"
-                    v-model="editingTodo.content"
-                    :class="[
-                      'w-full min-h-10 max-h-32 border-2 p-2 rounded-md focus:outline-2 focus:outline-blue-400',
-                      editingError ? 'border-red-500' : 'border-blue-300',
-                    ]"
-                    maxlength="100"
-                  ></textarea>
-                  <p v-if="editingError" class="text-sm text-red-500 text-left">
-                    {{ editingError }}
-                  </p>
-                  <div class="flex justify-end gap-2 mt-4">
-                    <button
-                      @click="showEditModal = false"
-                      class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
-                    >
-                      取消
-                    </button>
-                    <button
-                      @click="handleUpdateTodo"
-                      class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md"
-                    >
-                      更新
-                    </button>
-                  </div>
-                </div>
               </div>
               <!-- 局部載入遮罩 -->
               <div
