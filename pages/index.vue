@@ -236,12 +236,28 @@ onMounted(() => {
                     :key="todo.id"
                     class="flex items-center justify-start px-2 py-4 text-left border-b border-blue-100 text-blue-950 hover:bg-blue-50"
                   >
-                    <input type="checkbox" class="w-5 h-5" />
-                    <p class="pl-2">{{ todo.content }}</p>
+                    <input
+                      type="checkbox"
+                      :checked="todo.completed_at !== null"
+                      @change="todoStore.toggleTodo(todo.id)"
+                      class="w-5 h-5"
+                    />
+                    <p
+                      class="pl-2"
+                      :class="{
+                        'line-through text-gray-400':
+                          todo.completed_at !== null,
+                      }"
+                    >
+                      {{ todo.content }}
+                    </p>
                     <div class="ml-auto space-x-2">
                       <button
                         @click="handleEditClick(todo)"
                         class="text-blue-100 hover:text-blue-300"
+                        :class="{
+                          hidden: todo.completed_at !== null,
+                        }"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -261,7 +277,10 @@ onMounted(() => {
                       </button>
                       <button
                         @click="handleDeleteTodo(todo)"
-                        class="text-blue-100 hover:text-red-200"
+                        class="text-blue-100 hover:text-red-500"
+                        :class="{
+                          hidden: todo.completed_at !== null,
+                        }"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
