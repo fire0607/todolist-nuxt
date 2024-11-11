@@ -29,9 +29,9 @@ export const useUserStore = defineStore("user", () => {
     if (authHeader) {
       token.value = authHeader.replace("Bearer ", "");
       // 保存到 localStorage
-      localStorage.setItem("token", token.value);
-      // 保存到 useState（用於 SSR）
-      useState("token", () => token.value);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("token", token.value);
+      }
     }
   };
 
@@ -53,12 +53,12 @@ export const useUserStore = defineStore("user", () => {
       };
 
       // 儲存用戶資訊
-      localStorage.setItem("user", JSON.stringify(user.value));
-      useState("user", () => user.value);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("user", JSON.stringify(user.value));
+      }
       return response;
     } catch (error: any) {
       console.error("註冊錯誤:", error);
-      // 處理 422 驗證錯誤
       if (error.status === 422 && Array.isArray(error.data?.error)) {
         const errorMessages = error.data.error.map((err: string | string[]) => {
           if (err.includes("password.blank")) {
@@ -93,36 +93,28 @@ export const useUserStore = defineStore("user", () => {
           },
         }
       );
-      // 回應資料（JSON 內容）
       const data = response._data;
       console.log("取得回傳 res：", data);
 
-      // 確保回應格式正確
       if (!data || !data.email || !data.nickname) {
         throw new Error("伺服器回應格式錯誤");
       }
 
-      // 取得 headers，從中取出 authorization 欄位
       const authToken = response.headers.get("authorization");
-      console.log("取得authToken：", authToken);
-
       if (authToken) {
         const headers = new Headers({ authorization: authToken });
         setToken(headers);
       }
 
-      // 更新 user 資訊
       user.value = {
         email: data.email,
         nickname: data.nickname,
       };
 
-      // 儲存用戶資訊
-      localStorage.setItem("user", JSON.stringify(user.value));
-      useState("user", () => user.value);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("user", JSON.stringify(user.value));
+      }
 
-      console.log("取得 headers：", response.headers);
-      console.log("Authorization Token：", authToken);
       return data;
     } catch (error: any) {
       console.error("登入失敗:", error);
@@ -137,34 +129,29 @@ export const useUserStore = defineStore("user", () => {
   const logout = () => {
     user.value = null;
     token.value = null;
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    const tokenState = useState<string | null>("token");
-    const userState = useState<UserState["user"]>("user");
-    tokenState.value = null;
-    userState.value = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
   };
 
   // 初始化時檢查登入狀態
   const init = () => {
-    // 優先從 useState 讀取（支援 SSR）
-    const nuxtToken = useState<string | null>("token");
-    const nuxtUser = useState<UserState["user"]>("user");
-
-    if (nuxtToken.value && nuxtUser.value) {
-      token.value = nuxtToken.value;
-      user.value = nuxtUser.value;
-      return;
-    }
-
-    // 從 localStorage 讀取（僅客戶端）
-    if (process) {
+    if (typeof window !== 'undefined') {
       const savedToken = localStorage.getItem("token");
       const savedUser = localStorage.getItem("user");
 
-      if (savedToken && savedUser) {
+      if (savedToken) {
         token.value = savedToken;
-        user.value = JSON.parse(savedUser);
+      }
+
+      if (savedUser) {
+        try {
+          user.value = JSON.parse(savedUser);
+        } catch (e) {
+          console.error("解析使用者資料失敗:", e);
+          logout();
+        }
       }
     }
   };
