@@ -157,8 +157,9 @@ const handleDeleteTodo = async (todo: { id: string }) => {
     });
   }
 };
-// 頁面載入時執行初始化
+
 onMounted(() => {
+  userStore.init();
   initializeApp();
 });
 </script>
