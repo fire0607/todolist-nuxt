@@ -277,7 +277,7 @@ onMounted(() => {
                       </button>
                       <button
                         @click="handleDeleteTodo(todo)"
-                        class="text-blue-100 hover:text-red-200"
+                        class="text-blue-100 hover:text-red-500"
                         :class="{
                           hidden: todo.completed_at !== null,
                         }"
