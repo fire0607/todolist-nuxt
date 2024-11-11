@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TheSvg from "~/components/TheSvg.vue";
 import { useTodoStore } from "~/stores/todo";
 import { useUserStore } from "~/stores/user";
 import Swal from "sweetalert2";
@@ -181,14 +182,14 @@ onMounted(() => {
   <template v-else>
     <div class="w-screen bg-blue-100"></div>
     <section
-      class="min-h-screen bg-blue-300 relative mx-auto sm:grid overflow-x-hidden"
+      class="min-h-full bg-blue-300 relative mx-auto sm:grid sm:overflow-x-hidden sm:min-h-screen"
     >
       <section class="hidden absolute z-0 sm:flex">*精美的圖片*</section>
       <section
-        class="items-center justify-self-end bg-white w-full h-screen flex flex-col text-center sm:w-3/5"
+        class="items-center justify-self-end bg-white w-full h-full flex flex-col text-center sm:w-3/5"
       >
         <section class="w-full max-w-full px-8 sm:w-4/5 sm:px-0">
-          <div class="container mx-auto py-20 v-auto-animate">
+          <div class="container mx-auto pt-20 pb-10 v-auto-animate">
             <h1 class="text-2xl font-bold mb-4 text-left text-blue-950">
               今日待辦事項
             </h1>
@@ -317,6 +318,17 @@ onMounted(() => {
             </div>
           </div>
         </section>
+        <!-- 待辦事項下方圖片 -->
+        <div class="flex w-full items-center px-10">
+          <TheSvg
+            svgIcon="cat-walking"
+            class="w-[200px] h-[200px] block self-center sm:w-[300px] sm:h-[300px]"
+          />
+          <TheSvg
+            svgIcon="cat-paw-print"
+            class="w-[200px] mt-14 sm:w-[600px] sm:h-[80px]"
+          />
+        </div>
       </section>
     </section>
   </template>
