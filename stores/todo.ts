@@ -5,7 +5,7 @@ import { useUserStore } from "./user";
 interface Todo {
   id: string;
   content: string;
-  completed: boolean;
+  completed_at: null;
 }
 
 export const useTodoStore = defineStore("todo", () => {
@@ -62,7 +62,6 @@ export const useTodoStore = defineStore("todo", () => {
 
   // 新增待辦事項
   const addTodo = async (content: string) => {
-    // 內容不為空
     if (!content.trim()) {
       error.value = "待辦事項不能為空";
       return false;
@@ -73,27 +72,24 @@ export const useTodoStore = defineStore("todo", () => {
 
     try {
       const userStore = useUserStore();
-      const response = await $fetch<{ id: string; content: string }>(
-        "https://todoo.5xcamp.us/todos",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${userStore.getToken}`,
-            "Content-Type": "application/json",
+      const response = await $fetch<Todo>("https://todoo.5xcamp.us/todos", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userStore.getToken}`,
+          "Content-Type": "application/json",
+        },
+        body: {
+          todo: {
+            content: content.trim(),
           },
-          body: {
-            todo: {
-              content: content.trim(),
-            },
-          },
-        }
-      );
+        },
+      });
 
-      // 新增到本地狀態
+      // 新增到本地狀態時，確保 completed_at 為 null
       todos.value.push({
         id: response.id,
         content: response.content,
-        completed: false,
+        completed_at: null,
       });
 
       return true;
@@ -175,6 +171,45 @@ export const useTodoStore = defineStore("todo", () => {
     }
   };
 
+  //完成勾選待辦事項
+  const toggleTodo = async (id: string) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const userStore = useUserStore();
+      const response = await $fetch<Todo>(
+        `https://todoo.5xcamp.us/todos/${id}/toggle`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${userStore.getToken}`,
+            "Content-Type": "application/json",
+          },
+          // 需傳送空物件，API設計問題
+          body: {},
+        }
+      );
+
+      // 更新本地狀態
+      const index = todos.value.findIndex((todo) => todo.id === id);
+      if (index !== -1) {
+        todos.value[index] = {
+          ...todos.value[index],
+          completed_at: response.completed_at,
+        };
+      }
+
+      return true;
+    } catch (error: any) {
+      console.error("切換待辦事項狀態失敗:", error);
+      error.value = "切換待辦事項狀態失敗，請稍後再試";
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     // state
     todos,
@@ -189,5 +224,6 @@ export const useTodoStore = defineStore("todo", () => {
     addTodo,
     updateTodo,
     deleteTodo,
+    toggleTodo,
   };
 });
