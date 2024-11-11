@@ -180,12 +180,14 @@ onMounted(() => {
   <!-- 主畫面 -->
   <template v-else>
     <div class="w-screen bg-blue-100"></div>
-    <section class="bg-blue-300 w-screen h-screen relative mx-auto sm:grid">
-      <div class="hidden absolute z-0 sm:flex">*精美的圖片*</div>
+    <section
+      class="min-h-screen bg-blue-300 relative mx-auto sm:grid overflow-x-hidden"
+    >
+      <section class="hidden absolute z-0 sm:flex">*精美的圖片*</section>
       <section
         class="items-center justify-self-end bg-white w-full h-screen flex flex-col text-center sm:w-3/5"
       >
-        <section class="w-full px-8 sm:w-4/5 sm:px-0">
+        <section class="w-full max-w-full px-8 sm:w-4/5 sm:px-0">
           <div class="container mx-auto py-20 v-auto-animate">
             <h1 class="text-2xl font-bold mb-4 text-left text-blue-950">
               今日待辦事項
@@ -217,7 +219,7 @@ onMounted(() => {
             <!-- 待辦事項容器 -->
             <div class="relative h-[450px] overflow-y-auto">
               <!-- 錯誤訊息 -->
-              <div v-if="todoStore.getError" class="text-red-700">
+              <div v-if="todoStore.getError" class="text-red-700 break-words">
                 {{ todoStore.getError }}
               </div>
 
@@ -243,7 +245,7 @@ onMounted(() => {
                       class="w-5 h-5"
                     />
                     <p
-                      class="pl-2"
+                      class="pl-2 break-words flex-1 min-w-0"
                       :class="{
                         'line-through text-gray-400':
                           todo.completed_at !== null,
