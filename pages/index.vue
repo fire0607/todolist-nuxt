@@ -255,6 +255,9 @@ onMounted(() => {
                       <button
                         @click="handleEditClick(todo)"
                         class="text-blue-100 hover:text-blue-300"
+                        :class="{
+                          hidden: todo.completed_at !== null,
+                        }"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -275,6 +278,9 @@ onMounted(() => {
                       <button
                         @click="handleDeleteTodo(todo)"
                         class="text-blue-100 hover:text-red-200"
+                        :class="{
+                          hidden: todo.completed_at !== null,
+                        }"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
