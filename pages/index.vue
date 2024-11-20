@@ -3,6 +3,7 @@ import TheSvg from "~/components/TheSvg.vue";
 import { useTodoStore } from "~/stores/todo";
 import { useUserStore } from "~/stores/user";
 import Swal from "sweetalert2";
+import { throttle } from "lodash";
 
 interface EditingTodo {
   id: string;
@@ -50,9 +51,16 @@ async function initializeApp() {
   }
 }
 
-// 新增待辦事項
-const handleAddTodo = async () => {
+// 新增待辦事項 + 節流
+const throttledAddTodo = throttle(async () => {
   if (!value.value.trim()) {
+    toast.add({
+      title: "請輸入待辦事項",
+      icon: "i-heroicons-check-circle",
+      description: "待辦事項不能為空(  •̀ - •́  )",
+      color: "red",
+      timeout: 1500,
+    });
     return;
   }
 
@@ -68,6 +76,10 @@ const handleAddTodo = async () => {
     });
     value.value = "";
   }
+}, 3000);
+
+const handleAddTodo = () => {
+  throttledAddTodo();
 };
 
 // 更新待辦事項
